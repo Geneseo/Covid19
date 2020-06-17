@@ -1,9 +1,4 @@
-#!/usr/bin/env python
-
-"""
-A sample JSON to CSV program. Multivalued JSON properties are space delimited 
-CSV columns. If you'd like it adjusted send a pull request!
-"""
+# Still working on the preprocessing part
 
 from twarc import json2csv
 
