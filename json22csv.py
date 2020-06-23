@@ -2,7 +2,7 @@
 
 """
 A sample JSON to CSV program. Multivalued JSON properties are space delimited 
-CSV columns. If you'd like it adjusted send a pull request!
+CSV columns.
 """
 
 from twarc import json2csv
