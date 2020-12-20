@@ -1,5 +1,3 @@
-# Project Title
-
 # Covid19_ Sentiment Analysis
 
 
