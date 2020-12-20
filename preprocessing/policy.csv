@@ -1,0 +1,3 @@
+fips,StateName,StatePolicy,Mandate,StateWide,InGathLim,OutGathLim,InGathLimReligious,OutGathLimReligious,PublicMaskLevel,DateEnacted,DateExpiry,DateEased,DateEnded,DateReexpanded1,DateReeased1
+1,Alabama,OtherBusinessClose,1,1,,,,,,20200319,20201108,20200430,,,
+1,Alabama,OtherBusinessClose,0,1,,,,,,20200328,20201108,20200430,,,
