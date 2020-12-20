@@ -55,3 +55,4 @@ data.processed_data['simplified_created_at_date'] = pd.to_datetime(data.processe
 data.processed_data['simplified_created_at_week'] = data.processed_data['simplified_created_at_date'].dt.week # Week
 data.processed_data['month'] = data.processed_data['simplified_created_at_date'].dt.month # Month
 
+
