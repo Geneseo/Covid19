@@ -1,0 +1,110 @@
+import numpy as np
+import pandas as pd
+from os import path
+from PIL import Image
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+
+import matplotlib.pyplot as plt
+
+text = data.processed_data.text[0]
+
+# Create and generate a word cloud image:
+wordcloud = WordCloud().generate(text)
+
+# Display the generated image:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+
+text = " ".join(review for review in data.processed_data.text)
+stopwords = set(STOPWORDS)
+stopwords.update(["drink", "now", "wine", "flavor", "flavors", 'amp'])
+
+# Generate a word cloud image
+wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+
+# Display the generated image:
+# the matplotlib way:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+
+text = " ".join(review for review in data.processed_data.text)
+stopwords = set(STOPWORDS)
+stopwords.update(["drink", "now", "wine", "flavor", "flavors", 'amp'])
+
+# Generate a word cloud image
+wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+
+# Display the generated image:
+# the matplotlib way:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+
+#Democratic
+
+text = " ".join(review for review in data.processed_data.text)
+stopwords = set(STOPWORDS)
+stopwords.update(["drink", "now", "wine", "flavor", "flavors", 'amp', 'covid', 'pandemic', 'coronaviru', 'coronavirus'])
+
+# Generate a word cloud image
+wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+
+# Display the generated image:
+# the matplotlib way:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+
+#Republicans
+
+text = " ".join(review for review in data.processed_data.text)
+stopwords = set(STOPWORDS)
+stopwords.update(["drink", "now", "wine", "flavor", "flavors", 'amp', 'covid', 'pandemic', 'coronaviru', 'coronavirus' ,'stay',''])
+
+# Generate a word cloud image
+wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+
+# Display the generated image:
+# the matplotlib way:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+
+#Republicans
+
+text = " ".join(review for review in data.processed_data.text)
+stopwords = set(STOPWORDS)
+stopwords.update(["drink", "now", "wine", "flavor", "flavors", 'amp', 'covid', 'pandemic', 'coronaviru', 'coronavirus' ,'stay',''])
+
+# Generate a word cloud image
+wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+
+# Display the generated image:
+# the matplotlib way:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+
+
+#Republicans
+
+text = " ".join(review for review in data.processed_data.text)
+stopwords = set(STOPWORDS)
+stopwords.update(["drink", "now", "wine", "flavor", "flavors", 'amp', 'covid', 'pandemic', 'coronaviru', 'coronavirus' ,'stay','people'])
+
+# Generate a word cloud image
+wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+
+# Display the generated image:
+# the matplotlib way:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
