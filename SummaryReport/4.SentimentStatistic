@@ -1,0 +1,326 @@
+#visualization
+
+from collections import Counter
+import nltk
+
+#Activate NRCLex
+from nrclex import NRCLex
+
+import matplotlib.pyplot as plt
+import plotly.graph_objs as go
+from plotly.offline import init_notebook_mode, iplot
+import pandas as pd
+import numpy as np
+import re as regex
+import plotly
+from plotly import graph_objs
+from time import time
+import gensim
+from pathlib import Path
+
+
+import warnings
+warnings.filterwarnings('ignore')
+
+%matplotlib inline
+plotly.offline.init_notebook_mode()
+
+# loading data
+# Loading data
+class TwitterData_Initialize():
+    data = []
+    processed_data = []
+    wordlist = []
+
+    data_model = None
+    data_labels = None
+    is_testing = False
+    
+    def initialize(self, csv_file, is_testing_set=False, from_cached=None):
+        if from_cached is not None:
+            self.data_model = pd.read_csv(from_cached)
+            return
+        
+        self.data = pd.read_csv(csv_file,encoding='latin-1') # encoding must be done with latin-1 to avoid error
+            
+        self.processed_data = self.data.copy()
+        self.wordlist = []
+        self.data_model = None
+        self.data_labels = None
+        
+        
+#Visualization of NRC_lexicon with New package and Vader
+data_geofips = TwitterData_Initialize()
+
+data_geofips.initialize("NRC_Vader_geo_compiled_reallast.csv")
+
+data_geofips = data_geofips.processed_data
+data_geofips['simplified_created_at_date'] = pd.to_datetime(data_geofips['simplified_created_at'], errors='coerce')
+data_geofips['simplified_created_at_week'] = data_geofips['simplified_created_at_date'].dt.week
+data_geofips['month'] = data_geofips['simplified_created_at_date'].dt.month
+
+
+#x = a.append(b, ignore_index = True)  .reset_index()
+#California,Florida,Massachusetts,New York, North Carolina, Texas, Washington, Arizona,Colorado,Illinois,Pennsylvania,Virginia,Georgia,Michigan
+
+
+df = data_geofips['state'].reset_index()
+#df = df.merge(data_geofips['Rating'].reset_index())
+df = df.merge(data_geofips['simplified_created_at_week'].reset_index())
+
+
+df.groupby(['simplified_created_at_week','state']).count().reset_index()
+#df.to_csv("Weekly_VaderSentiment.csv", index=False, encoding='latin-1')
+
+df.to_csv("Weekly_Count.csv", index=False, encoding='latin-1')
+
+
+
+
+# Choose top 8 state
+a = data_geofips[data_geofips['state'] == 'New York']
+b = data_geofips[data_geofips['state'] == 'California']
+c = data_geofips[data_geofips['state'] == 'Florida']
+d = data_geofips[data_geofips['state'] == 'Texas']
+e = data_geofips[data_geofips['state'] == 'Pennsylvania']
+f = data_geofips[data_geofips['state'] == 'Georgia']
+g = data_geofips[data_geofips['state'] == 'Illinois']
+h = data_geofips[data_geofips['state'] == 'Washington']
+
+x = a.append(b, ignore_index = True)
+x = x.append(c, ignore_index = True)
+x = x.append(d, ignore_index = True)
+x = x.append(e, ignore_index = True)
+x = x.append(f, ignore_index = True)
+x = x.append(g, ignore_index = True)
+x = x.append(h, ignore_index = True)
+
+data_geofips = x
+
+#1.Afinn_Monthly (absolute vs relative)
+# Absolute
+cols = ['Negative','Positive','Neutral']
+
+k = data_geofips[(data_geofips['afinn_category']=='Negative')&(data_geofips['month']==2)]['state'].value_counts().reset_index()
+k = k.rename(columns = {'state':'Negative', 'index' : 'state'})
+
+l = data_geofips[(data_geofips['afinn_category']=='Positive')&(data_geofips['month']==2)]['state'].value_counts().reset_index()
+l = l.rename(columns = {'state':'Positive', 'index' : 'state'})
+
+o = data_geofips[(data_geofips['afinn_category']=='Neutral')&(data_geofips['month']==2)]['state'].value_counts().reset_index()
+o = o.rename(columns = {'state':'Neutral', 'index' : 'state'})
+
+#k.append([l,o], sort=False)
+#k.append(l, ignore_index=True, sort=False)
+
+k = k.merge(l)
+k = k.merge(o)
+k['Negative'] = k['Negative']/k['Negative'].sum(axis=0)*100
+k['Positive'] = k['Positive']/k['Positive'].sum(axis=0)*100
+k['Neutral'] = k['Neutral']/k['Neutral'].sum(axis=0)*100
+k['sum'] = k[cols].sum(axis=1)
+
+k = k.join(k.iloc[:, 1:4].div(k['sum'], axis=0).mul(100).add_prefix('%_'))
+
+k = k.drop(['Negative','Positive','Neutral','sum'], axis=1, inplace=False)
+
+k['month'] =2
+
+a2 = k
+
+##
+cols = ['Negative','Positive','Neutral']
+
+k = data_geofips[(data_geofips['afinn_category']=='Negative')&(data_geofips['month']==3)]['state'].value_counts().reset_index()
+k = k.rename(columns = {'state':'Negative', 'index' : 'state'})
+
+l = data_geofips[(data_geofips['afinn_category']=='Positive')&(data_geofips['month']==3)]['state'].value_counts().reset_index()
+l = l.rename(columns = {'state':'Positive', 'index' : 'state'})
+
+o = data_geofips[(data_geofips['afinn_category']=='Neutral')&(data_geofips['month']==3)]['state'].value_counts().reset_index()
+o = o.rename(columns = {'state':'Neutral', 'index' : 'state'})
+
+#k.append([l,o], sort=False)
+#k.append(l, ignore_index=True, sort=False)
+
+k = k.merge(l)
+k = k.merge(o)
+k['Negative'] = k['Negative']/k['Negative'].sum(axis=0)*100
+k['Positive'] = k['Positive']/k['Positive'].sum(axis=0)*100
+k['Neutral'] = k['Neutral']/k['Neutral'].sum(axis=0)*100
+k['sum'] = k[cols].sum(axis=1)
+
+k = k.join(k.iloc[:, 1:4].div(k['sum'], axis=0).mul(100).add_prefix('%_'))
+
+k = k.drop(['Negative','Positive','Neutral','sum'], axis=1, inplace=False)
+
+k['month'] =3
+
+a3 = k
+
+##
+cols = ['Negative','Positive','Neutral']
+
+k = data_geofips[(data_geofips['afinn_category']=='Negative')&(data_geofips['month']==4)]['state'].value_counts().reset_index()
+k = k.rename(columns = {'state':'Negative', 'index' : 'state'})
+
+l = data_geofips[(data_geofips['afinn_category']=='Positive')&(data_geofips['month']==4)]['state'].value_counts().reset_index()
+l = l.rename(columns = {'state':'Positive', 'index' : 'state'})
+
+o = data_geofips[(data_geofips['afinn_category']=='Neutral')&(data_geofips['month']==4)]['state'].value_counts().reset_index()
+o = o.rename(columns = {'state':'Neutral', 'index' : 'state'})
+
+#k.append([l,o], sort=False)
+#k.append(l, ignore_index=True, sort=False)
+
+k = k.merge(l)
+k = k.merge(o)
+k['Negative'] = k['Negative']/k['Negative'].sum(axis=0)*100
+k['Positive'] = k['Positive']/k['Positive'].sum(axis=0)*100
+k['Neutral'] = k['Neutral']/k['Neutral'].sum(axis=0)*100
+k['sum'] = k[cols].sum(axis=1)
+
+k = k.join(k.iloc[:, 1:4].div(k['sum'], axis=0).mul(100).add_prefix('%_'))
+
+k = k.drop(['Negative','Positive','Neutral','sum'], axis=1, inplace=False)
+
+k['month'] =4
+
+a4 = k
+
+a2 = a2.append(a3, ignore_index = True)
+a2 = a2.append(a4, ignore_index = True)
+a2
+
+###1.Afinn_Monthly( Relative way)
+# Choose top 8 and select 5043 tweets randomly
+a = data_geofips[(data_geofips['state'] == 'New York')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+b = data_geofips[(data_geofips['state'] == 'California')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+c = data_geofips[(data_geofips['state'] == 'Florida')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+d = data_geofips[(data_geofips['state'] == 'Texas')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+e = data_geofips[(data_geofips['state'] == 'Pennsylvania')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+f = data_geofips[(data_geofips['state'] == 'Georgia')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+g = data_geofips[(data_geofips['state'] == 'Illinois')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+h = data_geofips[(data_geofips['state'] == 'Washington')&(data_geofips['month']==2)].sample(n = 1361, replace = False) 
+
+x = a.append(b, ignore_index = True)
+x = x.append(c, ignore_index = True)
+x = x.append(d, ignore_index = True)
+x = x.append(e, ignore_index = True)
+x = x.append(f, ignore_index = True)
+x = x.append(g, ignore_index = True)
+x = x.append(h, ignore_index = True)
+
+# divisor = sum of rows in each sentiment.
+k = x[(x['afinn_category']=='Negative')&(x['month']==2)]['state'].value_counts().reset_index()
+k = k.rename(columns = {'state':'Negative', 'index' : 'state'})
+
+l = x[(x['afinn_category']=='Positive')&(x['month']==2)]['state'].value_counts().reset_index()
+l = l.rename(columns = {'state':'Positive', 'index' : 'state'})
+
+o = x[(x['afinn_category']=='Neutral')&(x['month']==2)]['state'].value_counts().reset_index()
+o = o.rename(columns = {'state':'Neutral', 'index' : 'state'})
+
+#k.append([l,o], sort=False)
+#k.append(l, ignore_index=True, sort=False)
+
+k = k.merge(l)
+k = k.merge(o)
+k['Negative'] = k['Negative']/k['Negative'].sum()*100
+k['Positive'] = k['Positive']/k['Positive'].sum()*100
+k['Neutral'] = k['Neutral']/k['Neutral'].sum()*100
+
+k['month'] =2
+a2 = k
+
+##
+## Relative way
+# Choose top 8 and select 5043 tweets randomly
+a = data_geofips[(data_geofips['state'] == 'New York')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+b = data_geofips[(data_geofips['state'] == 'California')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+c = data_geofips[(data_geofips['state'] == 'Florida')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+d = data_geofips[(data_geofips['state'] == 'Texas')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+e = data_geofips[(data_geofips['state'] == 'Pennsylvania')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+f = data_geofips[(data_geofips['state'] == 'Georgia')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+g = data_geofips[(data_geofips['state'] == 'Illinois')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+h = data_geofips[(data_geofips['state'] == 'Washington')&(data_geofips['month']==3)].sample(n = 1361, replace = False) 
+
+x = a.append(b, ignore_index = True)
+x = x.append(c, ignore_index = True)
+x = x.append(d, ignore_index = True)
+x = x.append(e, ignore_index = True)
+x = x.append(f, ignore_index = True)
+x = x.append(g, ignore_index = True)
+x = x.append(h, ignore_index = True)
+
+# divisor = sum of rows in each sentiment.
+k = x[(x['afinn_category']=='Negative')&(x['month']==3)]['state'].value_counts().reset_index()
+k = k.rename(columns = {'state':'Negative', 'index' : 'state'})
+
+l = x[(x['afinn_category']=='Positive')&(x['month']==3)]['state'].value_counts().reset_index()
+l = l.rename(columns = {'state':'Positive', 'index' : 'state'})
+
+o = x[(x['afinn_category']=='Neutral')&(x['month']==3)]['state'].value_counts().reset_index()
+o = o.rename(columns = {'state':'Neutral', 'index' : 'state'})
+
+#k.append([l,o], sort=False)
+#k.append(l, ignore_index=True, sort=False)
+
+k = k.merge(l)
+k = k.merge(o)
+k['Negative'] = k['Negative']/k['Negative'].sum()*100
+k['Positive'] = k['Positive']/k['Positive'].sum()*100
+k['Neutral'] = k['Neutral']/k['Neutral'].sum()*100
+
+k['month'] =3
+a3 = k
+
+##
+## Relative way
+# Choose top 8 and select 5043 tweets randomly
+a = data_geofips[(data_geofips['state'] == 'New York')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+b = data_geofips[(data_geofips['state'] == 'California')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+c = data_geofips[(data_geofips['state'] == 'Florida')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+d = data_geofips[(data_geofips['state'] == 'Texas')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+e = data_geofips[(data_geofips['state'] == 'Pennsylvania')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+f = data_geofips[(data_geofips['state'] == 'Georgia')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+g = data_geofips[(data_geofips['state'] == 'Illinois')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+h = data_geofips[(data_geofips['state'] == 'Washington')&(data_geofips['month']==4)].sample(n = 1361, replace = False) 
+
+x = a.append(b, ignore_index = True)
+x = x.append(c, ignore_index = True)
+x = x.append(d, ignore_index = True)
+x = x.append(e, ignore_index = True)
+x = x.append(f, ignore_index = True)
+x = x.append(g, ignore_index = True)
+x = x.append(h, ignore_index = True)
+
+# divisor = sum of rows in each sentiment.
+k = x[(x['afinn_category']=='Negative')&(x['month']==4)]['state'].value_counts().reset_index()
+k = k.rename(columns = {'state':'Negative', 'index' : 'state'})
+
+l = x[(x['afinn_category']=='Positive')&(x['month']==4)]['state'].value_counts().reset_index()
+l = l.rename(columns = {'state':'Positive', 'index' : 'state'})
+
+o = x[(x['afinn_category']=='Neutral')&(x['month']==4)]['state'].value_counts().reset_index()
+o = o.rename(columns = {'state':'Neutral', 'index' : 'state'})
+
+#k.append([l,o], sort=False)
+#k.append(l, ignore_index=True, sort=False)
+
+k = k.merge(l)
+k = k.merge(o)
+k['Negative'] = k['Negative']/k['Negative'].sum()*100
+k['Positive'] = k['Positive']/k['Positive'].sum()*100
+k['Neutral'] = k['Neutral']/k['Neutral'].sum()*100
+
+k['month'] =4
+a4 = k
+
+a2 = a2.append(a3, ignore_index = True)
+a2 = a2.append(a4, ignore_index = True)
+a2
+
+
+
+
